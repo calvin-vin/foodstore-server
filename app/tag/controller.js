@@ -8,11 +8,25 @@ const getAllTags = async (req, res) => {
 };
 
 const createTag = async (req, res) => {
+  // check policy
+  const policy = policyFor(req.user);
+
+  if (!policy.can("create", "Tag")) {
+    throw new UnauthenticatedError("You do not have access to this route");
+  }
+
   const tag = await Tag.create(req.body);
   res.status(StatusCodes.CREATED).json({ tag });
 };
 
 const updateTag = async (req, res) => {
+  // check policy
+  const policy = policyFor(req.user);
+
+  if (!policy.can("update", "Tag")) {
+    throw new UnauthenticatedError("You do not have access to this route");
+  }
+
   const tag = await Tag.findOneAndUpdate({ _id: req.params.id }, req.body, {
     new: true,
     runValidators: true,
@@ -26,6 +40,13 @@ const updateTag = async (req, res) => {
 };
 
 const deleteTag = async (req, res) => {
+  // check policy
+  const policy = policyFor(req.user);
+
+  if (!policy.can("delete", "Tag")) {
+    throw new UnauthenticatedError("You do not have access to this route");
+  }
+
   const tag = await Tag.findOneAndDelete({ _id: req.params.id });
 
   if (!tag) {

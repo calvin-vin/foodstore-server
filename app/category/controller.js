@@ -8,11 +8,25 @@ const getAllCategories = async (req, res) => {
 };
 
 const createCategory = async (req, res) => {
+  // check policy
+  const policy = policyFor(req.user);
+
+  if (!policy.can("create", "Category")) {
+    throw new UnauthenticatedError("You do not have access to this route");
+  }
+
   const category = await Category.create(req.body);
   res.status(StatusCodes.CREATED).json({ category });
 };
 
 const updateCategory = async (req, res) => {
+  // check policy
+  const policy = policyFor(req.user);
+
+  if (!policy.can("update", "Category")) {
+    throw new UnauthenticatedError("You do not have access to this route");
+  }
+
   const category = await Category.findOneAndUpdate(
     { _id: req.params.id },
     req.body,
@@ -27,6 +41,13 @@ const updateCategory = async (req, res) => {
 };
 
 const deleteCategory = async (req, res) => {
+  // check policy
+  const policy = policyFor(req.user);
+
+  if (!policy.can("deleye", "Category")) {
+    throw new UnauthenticatedError("You do not have access to this route");
+  }
+
   const category = await Category.findOneAndDelete({ _id: req.params.id });
 
   if (!category) {

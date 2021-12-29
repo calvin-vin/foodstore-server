@@ -6,18 +6,13 @@ const config = require("../config");
 const fs = require("fs");
 const path = require("path");
 const { policyFor } = require("../policy");
-const { NotFoundError, BadRequestError } = require("../errors");
+const {
+  NotFoundError,
+  BadRequestError,
+  UnauthenticatedError,
+} = require("../errors");
 
 const getAllProduct = async (req, res) => {
-  // check policy
-  // const policy = policyFor(req.user);
-
-  // if (!policy.can("create", "Product")) {
-  //   return res
-  //     .status(StatusCodes.UNAUTHORIZED)
-  //     .json({ message: "You do not have access to this route" });
-  // }
-
   // pagination
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
@@ -50,12 +45,14 @@ const getAllProduct = async (req, res) => {
     criteria.tags = { $in: inTags.map((tag) => tag._id) };
   }
 
+  const countProduct = await Product.find({ criteria }).countDocuments();
+
   const products = await Product.find(criteria)
     .limit(limit)
     .skip(skip)
     .populate("category")
     .populate("tags");
-  res.status(StatusCodes.OK).json({ products, count: products.length });
+  res.status(StatusCodes.OK).json({ products, count: countProduct });
 };
 
 const getProduct = async (req, res) => {
@@ -69,6 +66,13 @@ const getProduct = async (req, res) => {
 };
 
 const createProduct = async (req, res, next) => {
+  // check policy
+  const policy = policyFor(req.user);
+
+  if (!policy.can("create", "Product")) {
+    throw new UnauthenticatedError("You do not have access to this route");
+  }
+
   const payload = req.body;
 
   // check category
@@ -152,6 +156,13 @@ const createProduct = async (req, res, next) => {
 };
 
 const updateProduct = async (req, res, next) => {
+  // check policy
+  const policy = policyFor(req.user);
+
+  if (!policy.can("update", "Product")) {
+    throw new UnauthenticatedError("You do not have access to this route");
+  }
+
   const payload = req.body;
 
   const { price, category } = payload;
@@ -264,6 +275,13 @@ const updateProduct = async (req, res, next) => {
 };
 
 const deleteProduct = async (req, res) => {
+  // check policy
+  const policy = policyFor(req.user);
+
+  if (!policy.can("delete", "Product")) {
+    throw new UnauthenticatedError("You do not have access to this route");
+  }
+
   const product = await Product.findByIdAndDelete({ _id: req.params.id });
 
   if (!product) {
