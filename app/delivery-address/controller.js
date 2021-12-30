@@ -3,7 +3,6 @@ const { policyFor } = require("../policy");
 const { UnauthenticatedError, NotFoundError } = require("../errors");
 const { StatusCodes } = require("http-status-codes");
 const { subject } = require("@casl/ability");
-const { findOneAndDelete } = require("./model");
 
 const createDeliveryAddress = async (req, res) => {
   // check policy

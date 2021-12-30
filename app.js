@@ -14,6 +14,7 @@ const tagRouter = require("./app/tag/router");
 const authRouter = require("./app/auth/router");
 const regionRouter = require("./app/region/router");
 const deliveryAddressRouter = require("./app/delivery-address/router");
+const cartRouter = require("./app/cart/router");
 
 // defined middlewares
 const { decodeToken } = require("./app/auth/middleware");
@@ -39,6 +40,7 @@ app.use("/api/v1/tags", tagRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/region", regionRouter);
 app.use("/api/v1/delivery-address", deliveryAddressRouter);
+app.use("/api/v1/carts", cartRouter);
 
 // Error handler
 app.use(notFoundMiddleware);
