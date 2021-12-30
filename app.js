@@ -12,6 +12,7 @@ const productRouter = require("./app/product/router");
 const categoryRouter = require("./app/category/router");
 const tagRouter = require("./app/tag/router");
 const authRouter = require("./app/auth/router");
+const regionRouter = require("./app/region/router");
 
 // defined middlewares
 const { decodeToken } = require("./app/auth/middleware");
@@ -35,19 +36,10 @@ app.use("/api/v1/products", productRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/tags", tagRouter);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/region", regionRouter);
 
 // Error handler
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
-
-// app.use(function (err, req, res, next) {
-//   // set locals, only providing error in development
-//   res.locals.message = err.message;
-//   res.locals.error = req.app.get("env") === "development" ? err : {};
-
-//   // render the error page
-//   res.status(err.status || 500);
-//   res.render("error");
-// });
 
 module.exports = app;
