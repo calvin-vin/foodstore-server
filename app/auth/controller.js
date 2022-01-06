@@ -6,20 +6,12 @@ const passport = require("passport");
 const config = require("../config");
 const { getToken } = require("../utils/get-token");
 
-const register = async (req, res, next) => {
-  try {
-    const user = await User.create(req.body);
-    res.status(StatusCodes.CREATED).json({ user });
-  } catch (error) {
-    if (error && error.name === "ValidationError") {
-      res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ error: { message: error.message, fields: error.errors } });
-    }
-    next(error);
-  }
+const register = async (req, res) => {
+  const user = await User.create(req.body);
+  res.status(StatusCodes.CREATED).json({ user });
 };
 
+// authentication process
 const localStrategy = async (email, password, done) => {
   try {
     const user = await User.findOne({ email }).select(
@@ -68,12 +60,14 @@ const login = async (req, res, next) => {
   })(req, res, next);
 };
 
-const me = (req, res, next) => {
+const me = (req, res) => {
   if (!req.user) {
     return res.status(StatusCodes.BAD_REQUEST).json({
       message: `You're not logged in or token is expired`,
     });
   }
+
+  res.status(StatusCodes.OK).json({ user: req.user });
 };
 
 const logout = async (req, res, next) => {

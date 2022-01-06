@@ -17,7 +17,7 @@ function decodeToken() {
       if (!user) {
         return res
           .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "Token expired" });
+          .json({ message: "Token is expired" });
       }
     } catch (error) {
       if (error && error.name === "JsonWebTokenError") {
