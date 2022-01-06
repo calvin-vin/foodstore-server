@@ -1,6 +1,7 @@
 const Category = require("./model");
 const { StatusCodes } = require("http-status-codes");
-const { NotFoundError } = require("../errors");
+const { NotFoundError, UnauthenticatedError } = require("../errors");
+const { policyFor } = require("../policy");
 
 const getAllCategories = async (req, res) => {
   const categories = await Category.find({});

@@ -18,7 +18,7 @@ const getAllProduct = async (req, res) => {
   const limit = Number(req.query.limit) || 10;
   const skip = limit * (page - 1);
 
-  // filtering
+  // filter by name
   const criteria = {};
   const name = req.query.name || "";
   if (name.length) {
@@ -28,6 +28,7 @@ const getAllProduct = async (req, res) => {
     };
   }
 
+  // filter by category
   const category = req.query.category || "";
   if (category.length) {
     const inCategory = await Category.findOne({
@@ -39,13 +40,15 @@ const getAllProduct = async (req, res) => {
     }
   }
 
+  // filter by tags
   const tags = req.query.tags || [];
   if (tags.length) {
     const inTags = await Tag.find({ name: { $in: tags } });
     criteria.tags = { $in: inTags.map((tag) => tag._id) };
   }
 
-  const countProduct = await Product.find({ criteria }).countDocuments();
+  // total product
+  const countProduct = await Product.find(criteria).countDocuments();
 
   const products = await Product.find(criteria)
     .limit(limit)
@@ -56,7 +59,9 @@ const getAllProduct = async (req, res) => {
 };
 
 const getProduct = async (req, res) => {
-  const product = await Product.findOne({ _id: req.params.id });
+  const product = await Product.findOne({ _id: req.params.id })
+    .populate("category")
+    .populate("tags");
 
   if (!product) {
     throw new NotFoundError(`No Product with id ${req.params.id}`);
@@ -165,11 +170,9 @@ const updateProduct = async (req, res, next) => {
 
   const payload = req.body;
 
-  const { price, category } = payload;
-  if (price === "" || category === "") {
-    throw new BadRequestError(
-      "Name, price, and category fields cannot be empty"
-    );
+  // check product price
+  if (!payload.price) {
+    throw new BadRequestError("Please provide product price");
   }
 
   // check category
@@ -242,7 +245,13 @@ const updateProduct = async (req, res, next) => {
           { _id: req.params.id },
           { ...payload, image_url: filename },
           { new: true, runValidators: true }
-        );
+        )
+          .populate("category")
+          .populate("tags");
+
+        if (!product) {
+          throw new NotFoundError(`No product with id ${req.params.id}`);
+        }
 
         res.status(StatusCodes.OK).json({ product });
       } catch (error) {
@@ -269,7 +278,14 @@ const updateProduct = async (req, res, next) => {
         new: true,
         runValidators: true,
       }
-    );
+    )
+      .populate("category")
+      .populate("tags");
+
+    if (!product) {
+      throw new NotFoundError(`No product with id ${req.params.id}`);
+    }
+
     res.status(StatusCodes.OK).json({ product });
   }
 };
@@ -285,7 +301,7 @@ const deleteProduct = async (req, res) => {
   const product = await Product.findByIdAndDelete({ _id: req.params.id });
 
   if (!product) {
-    throw new NotFoundError(`No Job with id ${req.params.id}`);
+    throw new NotFoundError(`No product with id ${req.params.id}`);
   }
 
   let currentImage = `${config.rootPath}/public/upload/${product.image_url}`;
