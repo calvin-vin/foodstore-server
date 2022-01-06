@@ -27,13 +27,10 @@ const getDeliveryAddress = async (req, res) => {
   }
 
   const address = await DeliveryAddress.find({ user: req.user._id });
-  res.status(StatusCodes.OK).json(address);
+  res.status(StatusCodes.OK).json({ address });
 };
 
 const updateDeliveryAddress = async (req, res) => {
-  // check policy
-  const policy = policyFor(req.user);
-
   const { id } = req.params;
 
   let address = await DeliveryAddress.findOne({ _id: id });
@@ -42,11 +39,14 @@ const updateDeliveryAddress = async (req, res) => {
     user_id: address.user,
   });
 
-  if (!address) throw new NotFoundError(`No Address with id ${id}`);
+  // check policy
+  const policy = policyFor(req.user);
 
   if (!policy.can("update", subjectAddress)) {
     throw new UnauthenticatedError("You do not have access to this route");
   }
+
+  if (!address) throw new NotFoundError(`No Address with id ${id}`);
 
   address = await DeliveryAddress.findOneAndUpdate({ _id: id }, req.body, {
     new: true,
