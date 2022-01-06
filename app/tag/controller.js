@@ -1,6 +1,7 @@
 const Tag = require("./model");
 const { StatusCodes } = require("http-status-codes");
-const { NotFoundError } = require("../errors");
+const { NotFoundError, UnauthenticatedError } = require("../errors");
+const { policyFor } = require("../policy");
 
 const getAllTags = async (req, res) => {
   const tags = await Tag.find({});
