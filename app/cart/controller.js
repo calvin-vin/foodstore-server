@@ -1,7 +1,7 @@
 const Product = require("../product/model");
 const CartItem = require("../cart-item/model");
 const { policyFor } = require("../policy");
-const { UnauthenticatedError, NotFoundError } = require("../errors");
+const { UnauthenticatedError } = require("../errors");
 const { StatusCodes } = require("http-status-codes");
 
 const updateCart = async (req, res) => {

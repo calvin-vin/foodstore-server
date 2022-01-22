@@ -13,11 +13,6 @@ const {
 } = require("../errors");
 
 const getAllProduct = async (req, res) => {
-  // pagination
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 10;
-  const skip = limit * (page - 1);
-
   // filter by name
   const criteria = {};
   const name = req.query.name || "";
@@ -50,12 +45,28 @@ const getAllProduct = async (req, res) => {
   // total product
   const countProduct = await Product.find(criteria).countDocuments();
 
-  const products = await Product.find(criteria)
-    .limit(limit)
-    .skip(skip)
-    .populate("category")
-    .populate("tags");
-  res.status(StatusCodes.OK).json({ products, count: countProduct });
+  // pagination
+  let products;
+  const page = Number(req.query.page) || 1;
+  // if there's limit
+  if (req.query.limit) {
+    const limit = Number(req.query.limit);
+    const skip = limit * (page - 1);
+
+    products = await Product.find(criteria)
+      .limit(limit)
+      .skip(skip)
+      .populate("category")
+      .populate("tags");
+  } else {
+    products = await Product.find(criteria)
+      .populate("category")
+      .populate("tags");
+  }
+
+  res
+    .status(StatusCodes.OK)
+    .json({ products, count: products.length, total: countProduct });
 };
 
 const getProduct = async (req, res) => {
